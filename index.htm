@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>2分探索シミュレーション（探索過程ログ付き）</title>
+  <style>
+    /* 配列の各要素を表示するボックスのスタイル */
+    .box {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      line-height: 40px;
+      border: 1px solid #000;
+      margin: 5px;
+      text-align: center;
+      font-size: 18px;
+    }
+    /* 現在の候補範囲を示す（青い枠） */
+    .range {
+      border: 2px solid blue;
+    }
+    /* 現在探索中の要素（mid）をハイライト（黄色） */
+    .current {
+      background-color: yellow;
+    }
+    /* 探索に成功した場合の色（緑） */
+    .found {
+      background-color: lightgreen;
+    }
+  </style>
+</head>
+<body>
+  <h1>2分探索シミュレーション（探索過程ログ付き）</h1>
+  <p>
+    配列: <span id="array"></span>
+  </p>
+  <p>
+    探す値: <input type="number" id="searchKey" placeholder="値を入力">
+    <button id="startBtn">探索開始</button>
+  </p>
+  <p id="info"></p>
+  <p id="result"></p>
+  
+  <!-- 探索過程のログを表示するエリア -->
+  <h2>探索過程ログ</h2>
+  <ul id="log"></ul>
+
+  <script>
+    // 1～100の整数からランダムに9個生成し、昇順にソートする
+    let data = [];
+    for (let i = 0; i < 9; i++) {
+      data.push(Math.floor(Math.random() * 100) + 1);
+    }
+    data.sort((a, b) => a - b);
+
+    // 配列の内容を画面上に表示する関数
+    function displayArray() {
+      const arrayContainer = document.getElementById('array');
+      arrayContainer.innerHTML = '';  // 初期化
+      for (let i = 0; i < data.length; i++) {
+        const div = document.createElement('div');
+        div.classList.add('box');
+        div.id = 'box' + i;   // 一意のIDを設定
+        div.textContent = data[i];
+        arrayContainer.appendChild(div);
+      }
+    }
+
+    // 2分探索のシミュレーションを行う関数
+    function binarySearch(key) {
+      let low = 0;
+      let high = data.length - 1;
+      let stepCount = 1;  // 探索ステップの回数を記録するための変数
+
+      // 結果や情報のエリアをリセット
+      document.getElementById('result').textContent = "";
+      document.getElementById('info').textContent = "";
+      // 探索ログエリアをクリア
+      document.getElementById('log').innerHTML = '';
+
+      // すべてのボックスからハイライト用クラスを削除
+      for (let i = 0; i < data.length; i++) {
+        const box = document.getElementById('box' + i);
+        box.classList.remove('current', 'found', 'range');
+      }
+
+      // setInterval を使って 1 秒ごとに探索の各ステップを表示・記録
+      const intervalId = setInterval(() => {
+        // 探索範囲がなくなったら終了
+        if (low > high) {
+          clearInterval(intervalId);
+          document.getElementById('info').textContent = "";
+          document.getElementById('result').textContent = `探索完了: 値 ${key} は見つかりませんでした。`;
+          // ログにも結果を記録
+          const logEntry = document.createElement('li');
+          logEntry.textContent = `探索完了: 値 ${key} は見つかりませんでした。`;
+          document.getElementById('log').appendChild(logEntry);
+          return;
+        }
+
+        // 現在の探索候補範囲（low～high）のボックスに「range」クラスを追加
+        for (let i = 0; i < data.length; i++) {
+          const box = document.getElementById('box' + i);
+          box.classList.remove('range');
+          if (i >= low && i <= high) {
+            box.classList.add('range');
+          }
+        }
+
+        // 現在の探索範囲の中央（mid）を計算
+        let mid = Math.floor((low + high) / 2);
+
+        // 前回の current クラスをリセットし、mid のボックスに current クラスを追加
+        for (let i = 0; i < data.length; i++) {
+          document.getElementById('box' + i).classList.remove('current');
+        }
+        document.getElementById('box' + mid).classList.add('current');
+
+        // 現在の low, mid, high の値を画面に表示
+        document.getElementById('info').textContent = `low: ${low}, mid: ${mid}, high: ${high}`;
+
+        // 探索過程のログを記録
+        const logEntry = document.createElement('li');
+        logEntry.textContent = `Step ${stepCount}: 探索範囲 [${low}, ${high}], mid: ${mid} (値: ${data[mid]})`;
+        document.getElementById('log').appendChild(logEntry);
+        stepCount++;
+
+        // 探している値と mid の値を比較
+        if (data[mid] === key) {
+          clearInterval(intervalId);
+          // 探索成功： current クラスを外し、found クラスを追加
+          document.getElementById('box' + mid).classList.remove('current');
+          document.getElementById('box' + mid).classList.add('found');
+          document.getElementById('result').textContent = `探索完了: 値 ${key} はインデックス ${mid} に見つかりました。`;
+          // ログにも結果を記録
+          const foundEntry = document.createElement('li');
+          foundEntry.textContent = `探索完了: 値 ${key} はインデックス ${mid} に見つかりました。`;
+          document.getElementById('log').appendChild(foundEntry);
+          return;
+        } else if (data[mid] < key) {
+          low = mid + 1;
+        } else {
+          high = mid - 1;
+        }
+      }, 1000);  // 1 秒ごとに更新
+    }
+
+    // 「探索開始」ボタンがクリックされたときの処理
+    document.getElementById('startBtn').addEventListener('click', () => {
+      // 入力された値を数値に変換
+      const key = parseInt(document.getElementById('searchKey').value, 10);
+      if (isNaN(key)) {
+        document.getElementById('result').textContent = "探す値を正しく入力してください。";
+        return;
+      }
+      // 配列の状態をリセットして再表示（色などをリセット）
+      displayArray();
+      // 2分探索シミュレーションを開始
+      binarySearch(key);
+    });
+
+    // ページ読み込み時に配列を表示
+    displayArray();
+  </script>
+</body>
+</html>
