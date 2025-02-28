@@ -128,16 +128,19 @@ else:
           box.classList.toggle('current', i === mid);
         });
 
-        logMessage(`Step ${document.getElementById('log').children.length + 1}: Range [${low}, ${high}], mid: ${mid} (value: ${arr[mid]})`);
-
-        // Compare values
+        // Compare values before logging
         if (arr[mid] === key) {
-          clearInterval(intervalId);
+          clearInterval(intervalId); // Stop further iterations before logging
           document.getElementById('box' + mid).classList.add('found');
           logMessage(`Search complete: key ${key} found at index ${mid}.`, true);
-        } else {
-          arr[mid] < key ? (low = mid + 1) : (high = mid - 1);
+          return;
         }
+
+        // Log only if the search is still ongoing
+        logMessage(`Step ${document.getElementById('log').children.length + 1}: Range [${low}, ${high}], mid: ${mid} (value: ${arr[mid]})`);
+
+        // Update search range
+        arr[mid] < key ? (low = mid + 1) : (high = mid - 1);
       }, 1000);
     }
 
