@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Binary Search Simulation</title>
   <style>
-    /* 各セルのスタイル：添字と数字を縦に並べる */
+    /* Display index on top, number below */
     .cell {
       display: flex;
       flex-direction: column;
@@ -12,12 +12,10 @@
       margin: 5px;
       width: 40px;
     }
-    /* 添字のスタイル */
     .index {
       font-size: 14px;
       margin-bottom: 2px;
     }
-    /* 数字（ボックス）のスタイル */
     .box {
       display: inline-block;
       width: 40px;
@@ -27,23 +25,10 @@
       text-align: center;
       font-size: 18px;
     }
-    /* 探索候補範囲（青枠） */
-    .range {
-      border: 2px solid blue;
-    }
-    /* 探索中の要素（黄色ハイライト） */
-    .current {
-      background-color: yellow;
-    }
-    /* 探索成功時の色（緑） */
-    .found {
-      background-color: lightgreen;
-    }
-    /* 配列全体を横並びにするコンテナ */
-    #array-container {
-      display: flex;
-    }
-    /* Pythonコードブロックのスタイル調整 */
+    .range { border: 2px solid blue; }
+    .current { background-color: yellow; }
+    .found { background-color: lightgreen; }
+    #array-container { display: flex; }
     pre code {
       font-family: Consolas, "Courier New", monospace;
       font-size: 16px;
@@ -56,24 +41,27 @@
 </head>
 <body>
   <h1>Binary Search Simulation</h1>
-  
-  <!-- 添字と数字をまとめたセルを横並びに表示 -->
+
+  <!-- Display the array -->
   <div id="array-container"></div>
-  
-  <!-- 探す値の入力 -->
+
+  <!-- Input field and start button -->
   <p>
-    探す値: <input type="number" id="searchKey" placeholder="値を入力">
-    <button id="startBtn">探索開始</button>
+    Search Key: <input type="number" id="searchKey" placeholder="Enter key">
+    <button id="startBtn">Start Search</button>
   </p>
-  
-  <!-- 探索過程ログ（Pythonコードより上に配置） -->
+
+  <!-- Log area for search process -->
   <h2>Search Process Log</h2>
   <ul id="log"></ul>
-  
-  <!-- 2分探索のPythonコード -->
+
+  <!-- Display search result below the log -->
+  <p id="result"></p>
+
+  <!-- Python code -->
   <h2>Binary Search Code</h2>
   <pre><code>
-# Binary Search Code
+# Binary Search Algorithm
 arr = [1,2,3,4,5,6,7,8,9]
 youso = 9
 low = 0
@@ -81,130 +69,98 @@ high = youso - 1
 while low <= high:
     mid = (low + high) // 2
     if arr[mid] == key:
-        print("探索完了: 値", key, "はインデックス", mid, "に見つかりました。")
+        print("Search complete: key", key, "found at index", mid)
         break
     elif arr[mid] < key:
         low = mid + 1
     else:
         high = mid - 1
 else:
-    print("探索完了: 値", key, "は見つかりませんでした。")
+    print("Search complete: key", key, "was not found.")
   </code></pre>
-  
-  <p id="info"></p>
-  <p id="result"></p>
-  
+
   <script>
-    // 要素数と固定リストの設定
+    // Fixed array and size
     const youso = 9;
     const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-    
-    // 各セルに添字と数字をまとめて表示する関数
+
+    // Function to display the array with indices
     function displayArray() {
       const container = document.getElementById('array-container');
       container.innerHTML = '';
-      for (let i = 0; i < youso; i++) {
+      arr.forEach((value, i) => {
         const cell = document.createElement('div');
         cell.classList.add('cell');
-        
+
         const indexDiv = document.createElement('div');
         indexDiv.classList.add('index');
         indexDiv.textContent = i;
         cell.appendChild(indexDiv);
-        
+
         const boxDiv = document.createElement('div');
         boxDiv.classList.add('box');
         boxDiv.id = 'box' + i;
-        boxDiv.textContent = arr[i];
+        boxDiv.textContent = value;
         cell.appendChild(boxDiv);
-        
+
         container.appendChild(cell);
-      }
+      });
     }
-    
-    // 2分探索シミュレーションの関数
+
+    // Binary search simulation
     function binarySearch(key) {
-      let low = 0;
-      let high = youso - 1;
-      let stepCount = 1;
-      
-      // 結果、情報、ログのリセット
-      document.getElementById('result').textContent = "";
-      document.getElementById('info').textContent = "";
+      let low = 0, high = youso - 1;
       document.getElementById('log').innerHTML = "";
-      
-      // 全てのボックスからハイライトクラスを削除
-      for (let i = 0; i < youso; i++) {
-        const box = document.getElementById('box' + i);
-        box.classList.remove('current', 'found', 'range');
-      }
-      
-      // 1秒ごとに探索ステップをシミュレーション
+      document.getElementById('result').textContent = "";
+
       const intervalId = setInterval(() => {
         if (low > high) {
           clearInterval(intervalId);
-          document.getElementById('info').textContent = "";
-          document.getElementById('result').textContent = `探索完了: 値 ${key} は見つかりませんでした。`;
-          const logEntry = document.createElement('li');
-          logEntry.textContent = `探索完了: 値 ${key} は見つかりませんでした。`;
-          document.getElementById('log').appendChild(logEntry);
+          logMessage(`Search complete: key ${key} was not found.`, true);
           return;
         }
-        
-        // 探索範囲内のボックスに青い枠を追加
-        for (let i = 0; i < youso; i++) {
-          const box = document.getElementById('box' + i);
-          box.classList.remove('range');
-          if (i >= low && i <= high) {
-            box.classList.add('range');
-          }
-        }
-        
+
         let mid = Math.floor((low + high) / 2);
-        
-        // 現在探索中のボックスに黄色ハイライトを追加
-        for (let i = 0; i < youso; i++) {
-          document.getElementById('box' + i).classList.remove('current');
-        }
-        document.getElementById('box' + mid).classList.add('current');
-        
-        // 現在のlow, mid, highの値を表示し、ログに記録
-        document.getElementById('info').textContent = `low: ${low}, mid: ${mid}, high: ${high}`;
-        const logEntry = document.createElement('li');
-        logEntry.textContent = `Step ${stepCount}: 探索範囲 [${low}, ${high}], mid: ${mid} (値: ${arr[mid]})`;
-        document.getElementById('log').appendChild(logEntry);
-        stepCount++;
-        
-        // 探索対象とmidの値を比較
+
+        // Reset and highlight range
+        document.querySelectorAll('.box').forEach((box, i) => {
+          box.classList.toggle('range', i >= low && i <= high);
+          box.classList.toggle('current', i === mid);
+        });
+
+        logMessage(`Step ${document.getElementById('log').children.length + 1}: Range [${low}, ${high}], mid: ${mid} (value: ${arr[mid]})`);
+
+        // Compare values
         if (arr[mid] === key) {
           clearInterval(intervalId);
-          document.getElementById('box' + mid).classList.remove('current');
           document.getElementById('box' + mid).classList.add('found');
-          document.getElementById('result').textContent = `探索完了: 値 ${key} はインデックス ${mid} に見つかりました。`;
-          const foundEntry = document.createElement('li');
-          foundEntry.textContent = `探索完了: 値 ${key} はインデックス ${mid} に見つかりました。`;
-          document.getElementById('log').appendChild(foundEntry);
-          return;
-        } else if (arr[mid] < key) {
-          low = mid + 1;
+          logMessage(`Search complete: key ${key} found at index ${mid}.`, true);
         } else {
-          high = mid - 1;
+          arr[mid] < key ? (low = mid + 1) : (high = mid - 1);
         }
       }, 1000);
     }
-    
-    // 探索開始ボタンのクリック処理
+
+    // Helper function to log messages
+    function logMessage(message, isFinal = false) {
+      const logEntry = document.createElement('li');
+      logEntry.textContent = message;
+      document.getElementById('log').appendChild(logEntry);
+      if (isFinal) document.getElementById('result').textContent = message;
+    }
+
+    // Event listener for start button
     document.getElementById('startBtn').addEventListener('click', () => {
       const key = parseInt(document.getElementById('searchKey').value, 10);
       if (isNaN(key)) {
-        document.getElementById('result').textContent = "探す値を正しく入力してください。";
+        document.getElementById('result').textContent = "Please enter a valid number.";
         return;
       }
       displayArray();
       binarySearch(key);
     });
-    
-    // ページ読み込み時に配列を表示
+
+    // Initialize display
     displayArray();
   </script>
 </body>
