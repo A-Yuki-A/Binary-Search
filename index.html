@@ -4,22 +4,34 @@
   <meta charset="UTF-8">
   <title>2分探索シミュレーション（探索過程ログ付き）</title>
   <style>
-    /* 配列の各要素を表示するボックスのスタイル */
+    /* 各セルのスタイル：添字と数字を縦に並べる */
+    .cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 5px;
+      width: 40px;
+    }
+    /* 添字のスタイル */
+    .index {
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+    /* 数字（ボックス）のスタイル */
     .box {
       display: inline-block;
       width: 40px;
       height: 40px;
       line-height: 40px;
       border: 1px solid #000;
-      margin: 5px;
       text-align: center;
       font-size: 18px;
     }
-    /* 現在の候補範囲を示す（青い枠） */
+    /* 探索候補範囲（青枠） */
     .range {
       border: 2px solid blue;
     }
-    /* 現在探索中の要素（mid）をハイライト（黄色） */
+    /* 探索中の要素（黄色ハイライト） */
     .current {
       background-color: yellow;
     }
@@ -27,35 +39,36 @@
     .found {
       background-color: lightgreen;
     }
-    /* 添字と配列をまとめるコンテナ */
+    /* 配列全体を横並びにするコンテナ */
     #array-container {
-      display: inline-block;
+      display: flex;
     }
-    #array-container > div {
-      text-align: center;
-    }
-    /* 添字用のスタイル */
-    .index {
-      display: inline-block;
-      width: 40px;
-      margin: 5px;
+    /* Pythonコードブロックのスタイル調整 */
+    pre code {
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 16px;
+      background-color: #f5f5f5;
+      padding: 10px;
+      display: block;
+      overflow-x: auto;
     }
   </style>
 </head>
 <body>
   <h1>2分探索シミュレーション（探索過程ログ付き）</h1>
   
-  <!-- 添字と配列の表示エリア（添字が上、数字が下） -->
-  <div id="array-container">
-    <div id="indices"></div>
-    <div id="array"></div>
-  </div>
+  <!-- 添字と数字をまとめたセルを横並びに表示 -->
+  <div id="array-container"></div>
   
   <!-- 探す値の入力 -->
   <p>
     探す値: <input type="number" id="searchKey" placeholder="値を入力">
     <button id="startBtn">探索開始</button>
   </p>
+  
+  <!-- 探索過程ログ（Pythonコードより上に配置） -->
+  <h2>探索過程ログ</h2>
+  <ul id="log"></ul>
   
   <!-- 2分探索のPythonコード -->
   <h2>2分探索のPythonコード</h2>
@@ -81,58 +94,52 @@ else:
   <p id="info"></p>
   <p id="result"></p>
   
-  <!-- 探索過程ログ表示エリア -->
-  <h2>探索過程ログ</h2>
-  <ul id="log"></ul>
-
   <script>
-    // 要素数を定数 youso として定義
+    // 要素数と固定リストの設定
     const youso = 9;
-    // リストを固定: arr = [1,2,3,4,5,6,7,8,9]
     const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-
-    // 添字と配列の内容を画面上に表示する関数
+    
+    // 各セルに添字と数字をまとめて表示する関数
     function displayArray() {
-      // 添字の表示
-      const indicesContainer = document.getElementById('indices');
-      indicesContainer.innerHTML = '';
+      const container = document.getElementById('array-container');
+      container.innerHTML = '';
       for (let i = 0; i < youso; i++) {
-        const span = document.createElement('span');
-        span.classList.add('index');
-        span.textContent = i;
-        indicesContainer.appendChild(span);
-      }
-      
-      // 配列の内容表示
-      const arrayContainer = document.getElementById('array');
-      arrayContainer.innerHTML = '';
-      for (let i = 0; i < youso; i++) {
-        const div = document.createElement('div');
-        div.classList.add('box');
-        div.id = 'box' + i;
-        div.textContent = arr[i];
-        arrayContainer.appendChild(div);
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        
+        const indexDiv = document.createElement('div');
+        indexDiv.classList.add('index');
+        indexDiv.textContent = i;
+        cell.appendChild(indexDiv);
+        
+        const boxDiv = document.createElement('div');
+        boxDiv.classList.add('box');
+        boxDiv.id = 'box' + i;
+        boxDiv.textContent = arr[i];
+        cell.appendChild(boxDiv);
+        
+        container.appendChild(cell);
       }
     }
-
-    // 2分探索のシミュレーションを行う関数
+    
+    // 2分探索シミュレーションの関数
     function binarySearch(key) {
       let low = 0;
       let high = youso - 1;
       let stepCount = 1;
-
-      // 結果や情報、ログのリセット
+      
+      // 結果、情報、ログのリセット
       document.getElementById('result').textContent = "";
       document.getElementById('info').textContent = "";
       document.getElementById('log').innerHTML = "";
-
-      // 全てのボックスからハイライト用クラスを削除
+      
+      // 全てのボックスからハイライトクラスを削除
       for (let i = 0; i < youso; i++) {
         const box = document.getElementById('box' + i);
         box.classList.remove('current', 'found', 'range');
       }
-
-      // 1秒ごとに探索ステップを表示・記録
+      
+      // 1秒ごとに探索ステップをシミュレーション
       const intervalId = setInterval(() => {
         if (low > high) {
           clearInterval(intervalId);
@@ -143,8 +150,8 @@ else:
           document.getElementById('log').appendChild(logEntry);
           return;
         }
-
-        // 現在の探索範囲 (low～high) のボックスに「range」クラスを追加
+        
+        // 探索範囲内のボックスに青い枠を追加
         for (let i = 0; i < youso; i++) {
           const box = document.getElementById('box' + i);
           box.classList.remove('range');
@@ -152,24 +159,23 @@ else:
             box.classList.add('range');
           }
         }
-
-        // 中央 (mid) を計算
+        
         let mid = Math.floor((low + high) / 2);
-
-        // 現在探索中のボックスをハイライト
+        
+        // 現在探索中のボックスに黄色ハイライトを追加
         for (let i = 0; i < youso; i++) {
           document.getElementById('box' + i).classList.remove('current');
         }
         document.getElementById('box' + mid).classList.add('current');
-
-        // low, mid, high の状態を表示し、ログに記録
+        
+        // 現在のlow, mid, highの値を表示し、ログに記録
         document.getElementById('info').textContent = `low: ${low}, mid: ${mid}, high: ${high}`;
         const logEntry = document.createElement('li');
         logEntry.textContent = `Step ${stepCount}: 探索範囲 [${low}, ${high}], mid: ${mid} (値: ${arr[mid]})`;
         document.getElementById('log').appendChild(logEntry);
         stepCount++;
-
-        // 探索対象と比較
+        
+        // 探索対象とmidの値を比較
         if (arr[mid] === key) {
           clearInterval(intervalId);
           document.getElementById('box' + mid).classList.remove('current');
@@ -186,8 +192,8 @@ else:
         }
       }, 1000);
     }
-
-    // 「探索開始」ボタンのクリック処理
+    
+    // 探索開始ボタンのクリック処理
     document.getElementById('startBtn').addEventListener('click', () => {
       const key = parseInt(document.getElementById('searchKey').value, 10);
       if (isNaN(key)) {
@@ -197,7 +203,7 @@ else:
       displayArray();
       binarySearch(key);
     });
-
+    
     // ページ読み込み時に配列を表示
     displayArray();
   </script>
