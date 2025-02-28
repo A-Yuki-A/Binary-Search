@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
   <meta charset="UTF-8">
   <title>Binary Search Simulation</title>
@@ -47,21 +47,21 @@
 
   <!-- Input field and start button -->
   <p>
-    Search Key: <input type="number" id="searchKey" placeholder="Enter key">
-    <button id="startBtn">Start Search</button>
+    探す値: <input type="number" id="searchKey" placeholder="値を入力">
+    <button id="startBtn">探索開始</button>
   </p>
 
   <!-- Log area for search process -->
-  <h2>Search Process Log</h2>
+  <h2>探索過程ログ</h2>
   <ul id="log"></ul>
 
   <!-- Display search result below the log -->
   <p id="result"></p>
 
   <!-- Python code -->
-  <h2>Binary Search Code</h2>
+  <h2>2分探索コード</h2>
   <pre><code>
-# Binary Search Algorithm
+# 2分探索アルゴリズム
 arr = [1,2,3,4,5,6,7,8,9]
 youso = 9
 low = 0
@@ -69,14 +69,14 @@ high = youso - 1
 while low <= high:
     mid = (low + high) // 2
     if arr[mid] == key:
-        print("Search complete: key", key, "found at index", mid)
+        print("探索完了: 値", key, "はインデックス", mid, "に見つかりました。")
         break
     elif arr[mid] < key:
         low = mid + 1
     else:
         high = mid - 1
 else:
-    print("Search complete: key", key, "was not found.")
+    print("探索完了: 値", key, "は見つかりませんでした。")
   </code></pre>
 
   <script>
@@ -116,7 +116,7 @@ else:
       const intervalId = setInterval(() => {
         if (low > high) {
           clearInterval(intervalId);
-          logMessage(`Search complete: key ${key} was not found.`, true);
+          logMessage(`探索完了: 値 ${key} は見つかりませんでした。`, true);
           return;
         }
 
@@ -132,12 +132,12 @@ else:
         if (arr[mid] === key) {
           clearInterval(intervalId); // Stop further iterations before logging
           document.getElementById('box' + mid).classList.add('found');
-          logMessage(`Search complete: key ${key} found at index ${mid}.`, true);
+          logMessage(`探索完了: 値 ${key} はインデックス ${mid} に見つかりました。`, true);
           return;
         }
 
         // Log only if the search is still ongoing
-        logMessage(`Step ${document.getElementById('log').children.length + 1}: Range [${low}, ${high}], mid: ${mid} (value: ${arr[mid]})`);
+        logMessage(`ステップ ${document.getElementById('log').children.length + 1}: 探索範囲 [${low}, ${high}], mid: ${mid} (値: ${arr[mid]})`);
 
         // Update search range
         arr[mid] < key ? (low = mid + 1) : (high = mid - 1);
@@ -156,7 +156,7 @@ else:
     document.getElementById('startBtn').addEventListener('click', () => {
       const key = parseInt(document.getElementById('searchKey').value, 10);
       if (isNaN(key)) {
-        document.getElementById('result').textContent = "Please enter a valid number.";
+        document.getElementById('result').textContent = "探す値を正しく入力してください。";
         return;
       }
       displayArray();
