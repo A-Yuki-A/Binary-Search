@@ -144,9 +144,9 @@ else:
         if (low > high) {
           clearInterval(intervalId);
           document.getElementById('info').textContent = "";
-          document.getElementById('result').textContent = 探索完了: 値 ${key} は見つかりませんでした。;
+          document.getElementById('result').textContent = `探索完了: 値 ${key} は見つかりませんでした。`;
           const logEntry = document.createElement('li');
-          logEntry.textContent = 探索完了: 値 ${key} は見つかりませんでした。;
+          logEntry.textContent = `探索完了: 値 ${key} は見つかりませんでした。`;
           document.getElementById('log').appendChild(logEntry);
           return;
         }
@@ -169,9 +169,9 @@ else:
         document.getElementById('box' + mid).classList.add('current');
         
         // 現在のlow, mid, highの値を表示し、ログに記録
-        document.getElementById('info').textContent = low: ${low}, mid: ${mid}, high: ${high};
+        document.getElementById('info').textContent = `low: ${low}, mid: ${mid}, high: ${high}`;
         const logEntry = document.createElement('li');
-        logEntry.textContent = Step ${stepCount}: 探索範囲 [${low}, ${high}], mid: ${mid} (値: ${arr[mid]});
+        logEntry.textContent = `Step ${stepCount}: 探索範囲 [${low}, ${high}], mid: ${mid} (値: ${arr[mid]})`;
         document.getElementById('log').appendChild(logEntry);
         stepCount++;
         
@@ -180,9 +180,9 @@ else:
           clearInterval(intervalId);
           document.getElementById('box' + mid).classList.remove('current');
           document.getElementById('box' + mid).classList.add('found');
-          document.getElementById('result').textContent = 探索完了: 値 ${key} はインデックス ${mid} に見つかりました。;
+          document.getElementById('result').textContent = `探索完了: 値 ${key} はインデックス ${mid} に見つかりました。`;
           const foundEntry = document.createElement('li');
-          foundEntry.textContent = 探索完了: 値 ${key} はインデックス ${mid} に見つかりました。;
+          foundEntry.textContent = `探索完了: 値 ${key} はインデックス ${mid} に見つかりました。`;
           document.getElementById('log').appendChild(foundEntry);
           return;
         } else if (arr[mid] < key) {
