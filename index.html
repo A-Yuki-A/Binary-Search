@@ -13,7 +13,7 @@
       width: 40px;
     }
     /* 添字のスタイル */
-    .subscript {
+    .index {
       font-size: 14px;
       margin-bottom: 2px;
     }
@@ -79,23 +79,27 @@ youso = 9
 low = 0
 high = youso - 1
 while low <= high:
-    median = (low + high) // 2
-    if arr[median] == key:
-        print("探索完了: 値", key, "は添字", median, "に見つかりました。")
+    mid = (low + high) // 2
+    if arr[mid] == key:
+        print("探索完了: 値", key, "はインデックス", mid, "に見つかりました。")
         break
-    elif arr[median] < key:
-        low = median + 1
+    elif arr[mid] < key:
+        low = mid + 1
     else:
-        high = median - 1
+        high = mid - 1
 else:
     print("探索完了: 値", key, "は見つかりませんでした。")
   </code></pre>
+  
+  <p id="info"></p>
+  <p id="result"></p>
   
   <script>
     // 要素数と固定リストの設定
     const youso = 9;
     const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9];
     
+    // 各セルに添字と数字をまとめて表示する関数
     function displayArray() {
       const container = document.getElementById('array-container');
       container.innerHTML = '';
@@ -103,10 +107,10 @@ else:
         const cell = document.createElement('div');
         cell.classList.add('cell');
         
-        const subscriptDiv = document.createElement('div');
-        subscriptDiv.classList.add('subscript');
-        subscriptDiv.textContent = i;
-        cell.appendChild(subscriptDiv);
+        const indexDiv = document.createElement('div');
+        indexDiv.classList.add('index');
+        indexDiv.textContent = i;
+        cell.appendChild(indexDiv);
         
         const boxDiv = document.createElement('div');
         boxDiv.classList.add('box');
@@ -118,6 +122,78 @@ else:
       }
     }
     
+    // 2分探索シミュレーションの関数
+    function binarySearch(key) {
+      let low = 0;
+      let high = youso - 1;
+      let stepCount = 1;
+      
+      // 結果、情報、ログのリセット
+      document.getElementById('result').textContent = "";
+      document.getElementById('info').textContent = "";
+      document.getElementById('log').innerHTML = "";
+      
+      // 全てのボックスからハイライトクラスを削除
+      for (let i = 0; i < youso; i++) {
+        const box = document.getElementById('box' + i);
+        box.classList.remove('current', 'found', 'range');
+      }
+      
+      // 1秒ごとに探索ステップをシミュレーション
+      const intervalId = setInterval(() => {
+        if (low > high) {
+          clearInterval(intervalId);
+          document.getElementById('info').textContent = "";
+          document.getElementById('result').textContent = 探索完了: 値 ${key} は見つかりませんでした。;
+          const logEntry = document.createElement('li');
+          logEntry.textContent = 探索完了: 値 ${key} は見つかりませんでした。;
+          document.getElementById('log').appendChild(logEntry);
+          return;
+        }
+        
+        // 探索範囲内のボックスに青い枠を追加
+        for (let i = 0; i < youso; i++) {
+          const box = document.getElementById('box' + i);
+          box.classList.remove('range');
+          if (i >= low && i <= high) {
+            box.classList.add('range');
+          }
+        }
+        
+        let mid = Math.floor((low + high) / 2);
+        
+        // 現在探索中のボックスに黄色ハイライトを追加
+        for (let i = 0; i < youso; i++) {
+          document.getElementById('box' + i).classList.remove('current');
+        }
+        document.getElementById('box' + mid).classList.add('current');
+        
+        // 現在のlow, mid, highの値を表示し、ログに記録
+        document.getElementById('info').textContent = low: ${low}, mid: ${mid}, high: ${high};
+        const logEntry = document.createElement('li');
+        logEntry.textContent = Step ${stepCount}: 探索範囲 [${low}, ${high}], mid: ${mid} (値: ${arr[mid]});
+        document.getElementById('log').appendChild(logEntry);
+        stepCount++;
+        
+        // 探索対象とmidの値を比較
+        if (arr[mid] === key) {
+          clearInterval(intervalId);
+          document.getElementById('box' + mid).classList.remove('current');
+          document.getElementById('box' + mid).classList.add('found');
+          document.getElementById('result').textContent = 探索完了: 値 ${key} はインデックス ${mid} に見つかりました。;
+          const foundEntry = document.createElement('li');
+          foundEntry.textContent = 探索完了: 値 ${key} はインデックス ${mid} に見つかりました。;
+          document.getElementById('log').appendChild(foundEntry);
+          return;
+        } else if (arr[mid] < key) {
+          low = mid + 1;
+        } else {
+          high = mid - 1;
+        }
+      }, 1000);
+    }
+    
+    // 探索開始ボタンのクリック処理
     document.getElementById('startBtn').addEventListener('click', () => {
       const key = parseInt(document.getElementById('searchKey').value, 10);
       if (isNaN(key)) {
@@ -125,8 +201,10 @@ else:
         return;
       }
       displayArray();
+      binarySearch(key);
     });
     
+    // ページ読み込み時に配列を表示
     displayArray();
   </script>
 </body>
