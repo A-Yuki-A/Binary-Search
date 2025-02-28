@@ -31,13 +31,45 @@
 </head>
 <body>
   <h1>2分探索シミュレーション（探索過程ログ付き）</h1>
+  <!-- 添字の表示エリア -->
+  <p>
+    添字: <span id="indices"></span>
+  </p>
+  <!-- 配列の内容表示エリア -->
   <p>
     配列: <span id="array"></span>
   </p>
+  <!-- 探す値入力部 -->
   <p>
     探す値: <input type="number" id="searchKey" placeholder="値を入力">
     <button id="startBtn">探索開始</button>
   </p>
+  <!-- ２分探索のPythonコードの表示 -->
+  <h2>2分探索のPythonコード</h2>
+  <pre><code>
+def binary_search(arr, key):
+    low, high = 0, len(arr) - 1
+    while low <= high:
+        mid = (low + high) // 2
+        if arr[mid] == key:
+            return mid
+        elif arr[mid] < key:
+            low = mid + 1
+        else:
+            high = mid - 1
+    return -1
+
+# 使用例
+import random
+data = sorted([random.randint(1, 100) for _ in range(9)])
+key = int(input("探す値を入力してください: "))
+result = binary_search(data, key)
+if result != -1:
+    print(f"探索完了: 値 {key} はインデックス {result} に見つかりました。")
+else:
+    print(f"探索完了: 値 {key} は見つかりませんでした。")
+  </code></pre>
+
   <p id="info"></p>
   <p id="result"></p>
   
@@ -53,8 +85,22 @@
     }
     data.sort((a, b) => a - b);
 
-    // 配列の内容を画面上に表示する関数
+    // 配列と添字の内容を画面上に表示する関数
     function displayArray() {
+      // 添字の表示
+      const indicesContainer = document.getElementById('indices');
+      indicesContainer.innerHTML = '';
+      for (let i = 0; i < data.length; i++) {
+        const span = document.createElement('span');
+        span.style.display = 'inline-block';
+        span.style.width = '40px';
+        span.style.margin = '5px';
+        span.style.textAlign = 'center';
+        span.textContent = i;
+        indicesContainer.appendChild(span);
+      }
+      
+      // 配列の内容表示
       const arrayContainer = document.getElementById('array');
       arrayContainer.innerHTML = '';  // 初期化
       for (let i = 0; i < data.length; i++) {
